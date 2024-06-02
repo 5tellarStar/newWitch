@@ -1,16 +1,19 @@
 
 
 #include <SFML/Graphics.hpp>
-float screenWidth = 240.f;
-float screenHeight = 144.f;
+
 
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(240, 144), "New Witch");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
 
+    sf::Texture texture;
+    texture.loadFromFile("Witch.png");
+    
+    sf::IntRect rectSourceSprite(1920,0,40,40);
+    sf::Sprite sprite(texture, rectSourceSprite);
+    sf::Clock clock;
 
     while (window.isOpen())
     {
@@ -19,37 +22,23 @@ int main()
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::Resized)
+        }
+
+        if(clock.getElapsedTime().asSeconds() > 1.0f)
+        {
+            if (rectSourceSprite.left == 1960)
             {
-                sf::Vector2u size = window.getSize();
-
-                float heightRatio = screenHeight / screenWidth;
-                float widthRatio = screenWidth / screenHeight;
-
-                if (size.y * widthRatio <= size.x)
-                {
-                    size.x = size.y * widthRatio;
-                }
-                else if (size.x * heightRatio <= size.y)
-                {
-                    size.y = size.x * heightRatio;
-                }
-
-                window.setSize(size);
+                rectSourceSprite.left = 0;
             }
-        }
+            else
+                rectSourceSprite.left += 40;
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            shape.setFillColor(sf::Color::Red);
-        }
-        else
-        {
-            shape.setFillColor(sf::Color::Green);
+            sprite.setTextureRect(rectSourceSprite);
+            clock.restart();
         }
 
         window.clear();
-        window.draw(shape);
+        window.draw(sprite);
         window.display();
     }
 
