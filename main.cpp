@@ -2,7 +2,18 @@
 
 #include <SFML/Graphics.hpp>
 
+int playerState = 0;
 
+int map[][] = 
+{
+    {1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1},
+    {1,1,1,1,1,1,1}
+}
 
 int main()
 {
@@ -11,7 +22,7 @@ int main()
     sf::Texture texture;
     texture.loadFromFile("Witch.png");
     
-    sf::IntRect rectSourceSprite(1920,0,40,40);
+    sf::IntRect rectSourcePlayer(1920,0,40,40);
     sf::Sprite sprite(texture, rectSourceSprite);
     sf::Clock clock;
 
@@ -26,14 +37,14 @@ int main()
 
         if(clock.getElapsedTime().asSeconds() > 1.0f)
         {
-            if (rectSourceSprite.left == 1960)
+            if (rectSourcePlayer.left == 1960)
             {
-                rectSourceSprite.left = 0;
+                rectSourcePlayer.left = 0;
             }
             else
-                rectSourceSprite.left += 40;
+                rectSourcePlayer.left += 40;
 
-            sprite.setTextureRect(rectSourceSprite);
+            sprite.setTextureRect(rectSourcePlayer);
             clock.restart();
         }
 
