@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-int playerState = 2;
+int playerState = 0;
 
 float playerX = 0;
 int oldPlayerX = 0;
@@ -31,12 +31,18 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(240, 144), "New Witch");
 
-    sf::Texture texture;
-    texture.loadFromFile("Witch.png");
+    sf::Texture playerTexture;
+    playerTexture.loadFromFile("Witch.png");
     
-    sf::IntRect rectSourcePlayer(1280,0,40,40);
-    sf::Sprite playerSprite(texture, rectSourcePlayer);
+    //rect to select sprite from the player spritesheet
+    sf::IntRect rectSourcePlayer(0,0,40,40);
+
+    sf::Sprite playerSprite(playerTexture, rectSourcePlayer);
+
+    //clock for players animation
     sf::Clock playerTime;
+
+    //clock to allow turning without walking
     sf::Clock walkDelay;
 
     while (window.isOpen())
@@ -48,22 +54,20 @@ int main()
                 window.close();
         }
 
-
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && !walking && canWalk)
         {
+            //does the player have to turn to walk in this direction
             if(playerDir != 0)
             {
+                //turn the player
                 playerDir = 0;
-                switch (playerState)
-                {
-                case 0:
-                    rectSourcePlayer.left = 0;
-                    break;
-                default:
-                    rectSourcePlayer.left = 480 + 640 * (playerState - 1);
-                    break;
-                }
+
+                //change to the right sprite
+                rectSourcePlayer.left = 640 * playerState;
+
+                //just to get the animation to work correct
                 animation = false;
+
                 playerTime.restart();
                 walkDelay.restart();
             }
@@ -79,16 +83,11 @@ int main()
             if(playerDir != 1)
             {
                 playerDir = 1;
-                switch (playerState)
-                {
-                case 0:
-                    rectSourcePlayer.left = 120;
-                    break;
-                default:
-                    rectSourcePlayer.left = 640 + 640 * (playerState - 1);
-                    break;
-                }
+
+                rectSourcePlayer.left = 160 + 640 * playerState;
+
                 animation = false;
+
                 playerTime.restart();
                 walkDelay.restart();
             }
@@ -104,15 +103,9 @@ int main()
             if(playerDir != 2)
             {
                 playerDir = 2;
-                switch (playerState)
-                {
-                case 0:
-                    rectSourcePlayer.left = 240;
-                    break;
-                default:
-                    rectSourcePlayer.left = 800 + 640 * (playerState - 1);
-                    break;
-                }
+
+                rectSourcePlayer.left = 320 + 640 * playerState;
+
                 animation = false;
                 playerTime.restart();
                 walkDelay.restart();
@@ -129,16 +122,11 @@ int main()
             if(playerDir != 3)
             {
                 playerDir = 3;
-                switch (playerState)
-                {
-                case 0:
-                    rectSourcePlayer.left = 360;
-                    break;
-                default:
-                    rectSourcePlayer.left = 960 + 640 * (playerState - 1);
-                    break;
-                }
+
+                rectSourcePlayer.left = 480 + 640 * playerState;
+
                 animation = false;
+
                 playerTime.restart();
                 walkDelay.restart();
             }
@@ -150,164 +138,94 @@ int main()
             }
         } 
 
-        switch (playerState)
-        {
-        case 0:
-            if(walking)
-            {
-                switch (playerDir)
-                {
-                case 0:
-                    playerY = oldPlayerY - playerTime.getElapsedTime().asSeconds();
-                    break;
-                case 1:
-                    playerX = oldPlayerX + playerTime.getElapsedTime().asSeconds();
-                    break;
-                case 2:
-                    playerY = oldPlayerY + playerTime.getElapsedTime().asSeconds();
-                    break;
-                case 3:
-                    playerX = oldPlayerX - playerTime.getElapsedTime().asSeconds();
-                    break;
-                default:
-                    break;
-                }
 
-                if(playerTime.getElapsedTime().asSeconds() > 1.0f)
-                {
-                    rectSourcePlayer.left = playerDir * 120;
-                    switch (playerDir)
-                    {
-                    case 0:
-                        oldPlayerY--;
-                        break;
-                    case 1:
-                        oldPlayerX++;
-                        break;
-                    case 2:
-                        oldPlayerY++;
-                        break;
-                    case 3:
-                        oldPlayerX--;
-                        break;
-                    
-                    default:
-                        break;
-                    }
-                    playerY = oldPlayerY;
-                    walking = false;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.75f && !animation)
-                {
-                    rectSourcePlayer.left = playerDir * 120 + 80;
-                    animation = true;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.50f && playerTime.getElapsedTime().asSeconds() < 0.75f && animation)
-                {
-                    rectSourcePlayer.left = playerDir * 120;
-                    animation = false;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.25f && playerTime.getElapsedTime().asSeconds() < 0.50f && !animation)
-                {
-                    rectSourcePlayer.left = playerDir * 120 + 40;
-                    animation = true;
-                }
-            }
-            break;
         
-        default:
-            if(walking)
+        if(walking)
+        {
+            //moves the player
+            switch (playerDir)
             {
+            case 0:
+                playerY = oldPlayerY - playerTime.getElapsedTime().asSeconds();
+                break;
+            case 1:
+                playerX = oldPlayerX + playerTime.getElapsedTime().asSeconds();
+                break;
+            case 2:
+                playerY = oldPlayerY + playerTime.getElapsedTime().asSeconds();
+                break;
+            case 3:
+                playerX = oldPlayerX - playerTime.getElapsedTime().asSeconds();
+                break;
+            default:
+                break;
+            }
+
+
+            if(playerTime.getElapsedTime().asSeconds() > 1.0f)
+            {
+                rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
+
+                //moves the player
                 switch (playerDir)
                 {
                 case 0:
-                    playerY = oldPlayerY - playerTime.getElapsedTime().asSeconds();
+                    oldPlayerY--;
                     break;
                 case 1:
-                    playerX = oldPlayerX + playerTime.getElapsedTime().asSeconds();
+                    oldPlayerX++;
                     break;
                 case 2:
-                    playerY = oldPlayerY + playerTime.getElapsedTime().asSeconds();
+                    oldPlayerY++;
                     break;
                 case 3:
-                    playerX = oldPlayerX - playerTime.getElapsedTime().asSeconds();
+                    oldPlayerX--;
                     break;
                 default:
                     break;
                 }
+                playerX = oldPlayerX;
+                playerY = oldPlayerY;
 
-                if(playerTime.getElapsedTime().asSeconds() > 1.0f)
-                {
-                    rectSourcePlayer.left = 480 + playerDir * 160 + 640 * (playerState - 1);
-                    switch (playerDir)
-                    {
-                    case 0:
-                        oldPlayerY--;
-                        break;
-                    case 1:
-                        oldPlayerX++;
-                        break;
-                    case 2:
-                        oldPlayerY++;
-                        break;
-                    case 3:
-                        oldPlayerX--;
-                        break;
-                    
-                    default:
-                        break;
-                    }
-                    playerY = oldPlayerY;
-                    walking = false;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.75f && !animation)
-                {
-                    rectSourcePlayer.left = 600 + playerDir * 160 + 640 * (playerState - 1);
-                    animation = true;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.50f && playerTime.getElapsedTime().asSeconds() < 0.75f && animation)
-                {
-                    rectSourcePlayer.left = 480 + playerDir * 160 + 640 * (playerState - 1);
-                    animation = false;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.25f && playerTime.getElapsedTime().asSeconds() < 0.50f && !animation)
-                {
-                    rectSourcePlayer.left = 560 + playerDir * 160 + 640 * (playerState - 1);
-                    animation = true;
-                }
+                walking = false;
             }
-            else
+            else if (playerTime.getElapsedTime().asSeconds() > 0.75f && !animation)
             {
-                if (playerTime.getElapsedTime().asSeconds() > 1.0f)
-                {
-                    rectSourcePlayer.left = 480 + playerDir * 160 + 640 * (playerState - 1);
-                    playerTime.restart();
-                    animation = false;
-                }
-                else if (playerTime.getElapsedTime().asSeconds() > 0.50f && !animation)
-                {
-                    rectSourcePlayer.left = 520 + playerDir * 160 + 640 * (playerState - 1);
-                    animation = true;
-                }
+                rectSourcePlayer.left = 120 + playerDir * 160 + 640 * playerState;
+
+                animation = true;
             }
-            break;
+            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && playerTime.getElapsedTime().asSeconds() < 0.75f && animation)
+            {
+                rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
+
+                animation = false;
+            }
+            else if (playerTime.getElapsedTime().asSeconds() > 0.25f && playerTime.getElapsedTime().asSeconds() < 0.50f && !animation)
+            {
+                rectSourcePlayer.left = 80 + playerDir * 160 + 640 * playerState;
+                
+                animation = true;
+            }
         }
-
-
-        /*
-        if(playerTime.getElapsedTime().asSeconds() > 1.0f)
+        else
         {
-            if (rectSourcePlayer.left == 1960)
+            if (playerTime.getElapsedTime().asSeconds() > 1.0f)
             {
-                rectSourcePlayer.left = 0;
-            }
-            else
-                rectSourcePlayer.left += 40;
+                rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
 
-            playerSprite.setTextureRect(rectSourcePlayer);
-            playerTime.restart();
+                playerTime.restart();
+                animation = false;
+            }
+            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && !animation)
+            {
+                rectSourcePlayer.left = 40 + playerDir * 160 + 640 * playerState;
+
+                animation = true;
+            }
         }
-        */
+
+
 
 
 
