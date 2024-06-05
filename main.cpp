@@ -1,6 +1,8 @@
 
 
 #include <SFML/Graphics.hpp>
+#include <bits/stdc++.h>
+using namespace std;
 
 int playerState = 0;
 
@@ -17,14 +19,20 @@ bool walking = false;
 
 bool canWalk = true;
 
-int map[6][10] = 
+int artMap[12][18] = 
 {
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1}
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
 int main()
@@ -166,7 +174,7 @@ int main()
             {
                 rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
 
-                //moves the player
+                //moves the player camera
                 switch (playerDir)
                 {
                 case 0:
@@ -237,18 +245,18 @@ int main()
 
         window.clear();
         playerSprite.setTextureRect(rectSourcePlayer);
-        playerSprite.setPosition(sf::Vector2f(playerX*16 - 12,playerY*16 - 24));
+        playerSprite.setPosition(sf::Vector2f((7)*16 - 12,(4)*16 - 24));
 
         sf::RectangleShape tile(sf::Vector2f(16, 16));
         tile.setFillColor(sf::Color::White);
 
-        for(int i = 0; i < 15; i++)
+        for(int i = 0; i < 17; i++)
         {
-            for(int j = 0; j < 9; j++)
+            for(int j = 0; j < 11; j++)
             {
-                if ((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1))
+                if (artMap[j-oldPlayerY][i-oldPlayerX] == 1)
                 {
-                    tile.setPosition(sf::Vector2f(i * 16, j * 16));
+                    tile.setPosition(sf::Vector2f((i-playerX-8) * 16, (j-playerY-5) * 16));
                     window.draw(tile);
                 }
             }
