@@ -4,12 +4,12 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int playerState = 0;
+int playerState = 1;
 
-float playerX = 0;
-int oldPlayerX = 0;
-float playerY = 0;
-int oldPlayerY = 0;
+float playerX = 1;
+int oldPlayerX = 1;
+float playerY = 1;
+int oldPlayerY = 1;
 
 int playerDir = 2;
 
@@ -19,25 +19,58 @@ bool walking = false;
 
 bool canWalk = true;
 
-int artMap[12][18] = 
+int artUnderMap[12][18] = 
 {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
-    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+};
+int artOverMap[12][18] = 
+{
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+};
+int colisionMap[12][18] = 
+{
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(240, 144), "New Witch");
+    sf::View view = window.getView();
+    view.setCenter(playerX*16,playerY*16);
+    window.setView(view);
 
     sf::Texture playerTexture;
     playerTexture.loadFromFile("Witch.png");
@@ -79,10 +112,13 @@ int main()
                 playerTime.restart();
                 walkDelay.restart();
             }
-            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f)
+            //if the player doesn't just want to turn and the player can walk there
+            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f && colisionMap[oldPlayerY - 1][oldPlayerX] == 0)
             {
                 walking = true;
+
                 animation = false;
+
                 playerTime.restart();
             }
         }
@@ -99,10 +135,12 @@ int main()
                 playerTime.restart();
                 walkDelay.restart();
             }
-            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f)
+            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f && colisionMap[oldPlayerY][oldPlayerX + 1] == 0)
             {
                 walking = true;
+
                 animation = false;
+
                 playerTime.restart();
             }
         }
@@ -115,13 +153,16 @@ int main()
                 rectSourcePlayer.left = 320 + 640 * playerState;
 
                 animation = false;
+
                 playerTime.restart();
                 walkDelay.restart();
             }
-            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f)
+            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f && colisionMap[oldPlayerY + 1][oldPlayerX] == 0)
             {
                 walking = true;
+
                 animation = false;
+
                 playerTime.restart();
             }
         }
@@ -138,10 +179,12 @@ int main()
                 playerTime.restart();
                 walkDelay.restart();
             }
-            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f)
+            else if (walkDelay.getElapsedTime().asSeconds() > 0.15f && colisionMap[oldPlayerY][oldPlayerX - 1] == 0)
             {
                 walking = true;
+
                 animation = false;
+
                 playerTime.restart();
             }
         } 
@@ -150,7 +193,7 @@ int main()
         
         if(walking)
         {
-            //moves the player
+            //moves the player in the direction she's facing
             switch (playerDir)
             {
             case 0:
@@ -169,12 +212,12 @@ int main()
                 break;
             }
 
-
+            //mostly just animation
             if(playerTime.getElapsedTime().asSeconds() > 1.0f)
             {
                 rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
 
-                //moves the player camera
+                //moves the player
                 switch (playerDir)
                 {
                 case 0:
@@ -218,6 +261,7 @@ int main()
         }
         else
         {
+            //idle animation
             if (playerTime.getElapsedTime().asSeconds() > 1.0f)
             {
                 rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
@@ -242,27 +286,52 @@ int main()
 
 
 
-
+        //removes last frame
         window.clear();
+
+        //centers the camera on the player
+        view.setCenter(clamp(playerX,7.5f,static_cast<float>(sizeof(artUnderMap[0])/sizeof(artUnderMap[0][0])) - 7.5f)*16,clamp(playerY,4.5f,static_cast<float>(sizeof(artUnderMap)/sizeof(artUnderMap[0])) - 4.5f)*16);
+        window.setView(view);
+
+        //sets player sprite
         playerSprite.setTextureRect(rectSourcePlayer);
-        playerSprite.setPosition(sf::Vector2f((7)*16 - 12,(4)*16 - 24));
+
+        //sets player position
+        playerSprite.setPosition(sf::Vector2f((playerX)*16 - 12,(playerY)*16 - 24));
 
         sf::RectangleShape tile(sf::Vector2f(16, 16));
         tile.setFillColor(sf::Color::White);
-
-        for(int i = 0; i < 17; i++)
+        
+        //draws the stuff that's behind the player
+        for(int j = 0; j < sizeof(artUnderMap)/sizeof(artUnderMap[0]); j++)
         {
-            for(int j = 0; j < 11; j++)
+            for(int i = 0; i < sizeof(artUnderMap[0])/sizeof(artUnderMap[0][0]); i++)
             {
-                if (artMap[j-oldPlayerY][i-oldPlayerX] == 1)
+                if (artUnderMap[j][i] != 0)
                 {
-                    tile.setPosition(sf::Vector2f((i-playerX-8) * 16, (j-playerY-5) * 16));
+                    tile.setPosition(sf::Vector2f(i * 16, j * 16));
                     window.draw(tile);
                 }
             }
         }
 
+        //draws the player
         window.draw(playerSprite);
+
+        //draws the stuff that's in front the player
+        for(int j = 0; j < sizeof(artOverMap)/sizeof(artOverMap[0]); j++)
+        {
+            for(int i = 0; i < sizeof(artOverMap[0])/sizeof(artOverMap[0][0]); i++)
+            {
+                if (artOverMap[j][i] != 0)
+                {
+                    tile.setPosition(sf::Vector2f(i * 16, j * 16));
+                    window.draw(tile);
+                }
+            }
+        }
+
+        //shows the frame
         window.display();
         
     }
