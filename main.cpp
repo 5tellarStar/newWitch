@@ -13,11 +13,20 @@ int oldPlayerY = 1;
 
 int playerDir = 2;
 
-bool animation = false;
+bool playerAnimation = false;
 
 bool walking = false;
 
 bool canWalk = true;
+
+bool bookOpening = false;
+bool bookClosing = false;
+bool bookOpen = false;
+bool turningPageF = false;
+bool turningPageB = false;
+
+int openPage = 0;
+int pagesFound = 1;
 
 int artUnderMap[12][18] = 
 {
@@ -77,8 +86,16 @@ int main()
     
     //rect to select sprite from the player spritesheet
     sf::IntRect rectSourcePlayer(0,0,40,40);
-
     sf::Sprite playerSprite(playerTexture, rectSourcePlayer);
+    
+
+    sf::Texture bookUITexture;
+    bookUITexture.loadFromFile("ShadowBook.png");
+
+    sf::IntRect rectSourceBookUI(1016,0,127,101);
+    sf::Sprite bookUISprite(bookUITexture, rectSourceBookUI);
+
+    sf::Clock bookTime;
 
     //clock for players animation
     sf::Clock playerTime;
@@ -95,6 +112,33 @@ int main()
                 window.close();
         }
 
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            if(sf::FloatRect(180,0,9,11).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && !bookOpen && !bookOpening && !bookClosing)
+            {
+                bookOpening = true;
+                bookTime.restart();
+            }
+            else if(sf::FloatRect(180,88,9,13).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && bookOpen && !turningPageF && !turningPageB)
+            {
+                bookClosing = true;
+                bookOpen = false;
+                bookTime.restart();
+            }
+            else if(sf::FloatRect(175,1,50,87).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && bookOpen && !turningPageF && !turningPageB && openPage < pagesFound)
+            {
+                turningPageF = true;
+                bookTime.restart();
+            }
+            else if(sf::FloatRect(125,1,50,87).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && bookOpen && !turningPageF && !turningPageB && openPage != 0)
+            {
+                turningPageB = true;
+                bookTime.restart();
+            }
+        }
+
+
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && !walking && canWalk)
         {
             //does the player have to turn to walk in this direction
@@ -107,7 +151,7 @@ int main()
                 rectSourcePlayer.left = 640 * playerState;
 
                 //just to get the animation to work correct
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
                 walkDelay.restart();
@@ -117,7 +161,7 @@ int main()
             {
                 walking = true;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
             }
@@ -130,7 +174,7 @@ int main()
 
                 rectSourcePlayer.left = 160 + 640 * playerState;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
                 walkDelay.restart();
@@ -139,7 +183,7 @@ int main()
             {
                 walking = true;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
             }
@@ -152,7 +196,7 @@ int main()
 
                 rectSourcePlayer.left = 320 + 640 * playerState;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
                 walkDelay.restart();
@@ -161,7 +205,7 @@ int main()
             {
                 walking = true;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
             }
@@ -174,7 +218,7 @@ int main()
 
                 rectSourcePlayer.left = 480 + 640 * playerState;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
                 walkDelay.restart();
@@ -183,14 +227,13 @@ int main()
             {
                 walking = true;
 
-                animation = false;
+                playerAnimation = false;
 
                 playerTime.restart();
             }
         } 
 
 
-        
         if(walking)
         {
             //moves the player in the direction she's facing
@@ -240,23 +283,23 @@ int main()
 
                 walking = false;
             }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.75f && !animation)
+            else if (playerTime.getElapsedTime().asSeconds() > 0.75f && !playerAnimation)
             {
                 rectSourcePlayer.left = 120 + playerDir * 160 + 640 * playerState;
 
-                animation = true;
+                playerAnimation = true;
             }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && playerTime.getElapsedTime().asSeconds() < 0.75f && animation)
+            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && playerTime.getElapsedTime().asSeconds() < 0.75f && playerAnimation)
             {
                 rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
 
-                animation = false;
+                playerAnimation = false;
             }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.25f && playerTime.getElapsedTime().asSeconds() < 0.50f && !animation)
+            else if (playerTime.getElapsedTime().asSeconds() > 0.25f && playerTime.getElapsedTime().asSeconds() < 0.50f && !playerAnimation)
             {
                 rectSourcePlayer.left = 80 + playerDir * 160 + 640 * playerState;
                 
-                animation = true;
+                playerAnimation = true;
             }
         }
         else
@@ -267,16 +310,85 @@ int main()
                 rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
 
                 playerTime.restart();
-                animation = false;
+                playerAnimation = false;
             }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && !animation)
+            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && !playerAnimation)
             {
                 rectSourcePlayer.left = 40 + playerDir * 160 + 640 * playerState;
 
-                animation = true;
+                playerAnimation = true;
+            }
+        }
+        //sets player sprite
+        playerSprite.setTextureRect(rectSourcePlayer);
+
+        //sets player position
+        playerSprite.setPosition(sf::Vector2f((playerX)*16 - 12,(playerY)*16 - 24));
+
+        //centers the camera on the player
+        view.setCenter(clamp(playerX,7.5f,static_cast<float>(sizeof(artUnderMap[0])/sizeof(artUnderMap[0][0])) - 7.5f)*16,clamp(playerY,4.5f,static_cast<float>(sizeof(artUnderMap)/sizeof(artUnderMap[0])) - 4.5f)*16);
+        window.setView(view);
+
+
+
+        if(bookOpening)
+        {
+            bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 162 + 360 * bookTime.getElapsedTime().asSeconds()));
+
+            if(bookTime.getElapsedTime().asSeconds() > 0.25f)
+            {
+                bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 72));
+                bookOpening = false;
+                bookOpen = true;
+            }
+        }
+        else if (bookClosing)
+        {
+            bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 72 - 360 * bookTime.getElapsedTime().asSeconds()));
+
+            if(bookTime.getElapsedTime().asSeconds() > 0.25f)
+            {
+                bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 162));
+                bookClosing = false;
+            }
+        }
+        else if (!bookOpen)
+        {
+            bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 162));
+        }
+        else if (bookOpen)
+        {
+            bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 72));
+        }
+
+        if (turningPageF)
+        {
+            if(openPage == 0)
+            {
+                rectSourceBookUI.left = 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 0;
+                    turningPageF = false;
+                    openPage++;
+                }
+            }
+        }
+        else if (turningPageB)
+        {
+            if(openPage == 1)
+            {
+                rectSourceBookUI.left = 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 1016;
+                    turningPageB = false;
+                    openPage--;
+                }
             }
         }
 
+        bookUISprite.setTextureRect(rectSourceBookUI);
 
 
 
@@ -289,15 +401,6 @@ int main()
         //removes last frame
         window.clear();
 
-        //centers the camera on the player
-        view.setCenter(clamp(playerX,7.5f,static_cast<float>(sizeof(artUnderMap[0])/sizeof(artUnderMap[0][0])) - 7.5f)*16,clamp(playerY,4.5f,static_cast<float>(sizeof(artUnderMap)/sizeof(artUnderMap[0])) - 4.5f)*16);
-        window.setView(view);
-
-        //sets player sprite
-        playerSprite.setTextureRect(rectSourcePlayer);
-
-        //sets player position
-        playerSprite.setPosition(sf::Vector2f((playerX)*16 - 12,(playerY)*16 - 24));
 
         sf::RectangleShape tile(sf::Vector2f(16, 16));
         tile.setFillColor(sf::Color::White);
@@ -315,6 +418,7 @@ int main()
             }
         }
 
+
         //draws the player
         window.draw(playerSprite);
 
@@ -330,6 +434,10 @@ int main()
                 }
             }
         }
+
+
+
+        window.draw(bookUISprite);
 
         //shows the frame
         window.display();
