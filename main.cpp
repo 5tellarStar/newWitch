@@ -26,7 +26,7 @@ bool turningPageF = false;
 bool turningPageB = false;
 
 int openPage = 0;
-int pagesFound = 1;
+int pagesFound = 3;
 
 int artUnderMap[12][18] = 
 {
@@ -92,7 +92,7 @@ int main()
     sf::Texture bookUITexture;
     bookUITexture.loadFromFile("ShadowBook.png");
 
-    sf::IntRect rectSourceBookUI(1016,0,127,101);
+    sf::IntRect rectSourceBookUI(0,0,127,101);
     sf::Sprite bookUISprite(bookUITexture, rectSourceBookUI);
 
     sf::Clock bookTime;
@@ -125,7 +125,7 @@ int main()
                 bookOpen = false;
                 bookTime.restart();
             }
-            else if(sf::FloatRect(175,1,50,87).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && bookOpen && !turningPageF && !turningPageB && openPage < pagesFound)
+            else if(sf::FloatRect(175,1,50,87).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && bookOpen && !turningPageF && !turningPageB && openPage - 1 < pagesFound)
             {
                 turningPageF = true;
                 bookTime.restart();
@@ -355,6 +355,8 @@ int main()
         else if (!bookOpen)
         {
             bookUISprite.setPosition(sf::Vector2f(view.getCenter().x - 8,view.getCenter().y - 162));
+            rectSourceBookUI.left = 0;
+            openPage = 0;
         }
         else if (bookOpen)
         {
@@ -365,10 +367,50 @@ int main()
         {
             if(openPage == 0)
             {
-                rectSourceBookUI.left = 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                rectSourceBookUI.left = 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
                 if (bookTime.getElapsedTime().asSeconds() > 1.0f)
                 {
-                    rectSourceBookUI.left = 0;
+                    rectSourceBookUI.left = 1016;
+                    turningPageF = false;
+                    openPage++;
+                }
+            }
+            else if (openPage == 1 && openPage == pagesFound)
+            {
+                rectSourceBookUI.left = 1143 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 2159;
+                    turningPageF = false;
+                    openPage++;
+                }
+            }
+            else if (openPage == 1)
+            {
+                rectSourceBookUI.left = 2286 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 3302;
+                    turningPageF = false;
+                    openPage++;
+                }
+            }
+            else if (openPage == pagesFound)
+            {
+                rectSourceBookUI.left = 3429 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 4445;
+                    turningPageF = false;
+                    openPage++;
+                }
+            }
+            else
+            {
+                rectSourceBookUI.left = 4572 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 5588;
                     turningPageF = false;
                     openPage++;
                 }
@@ -378,10 +420,50 @@ int main()
         {
             if(openPage == 1)
             {
-                rectSourceBookUI.left = 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                rectSourceBookUI.left = 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
                 if (bookTime.getElapsedTime().asSeconds() > 1.0f)
                 {
-                    rectSourceBookUI.left = 1016;
+                    rectSourceBookUI.left = 0;
+                    turningPageB = false;
+                    openPage--;
+                }
+            }
+            else if (openPage == 2 && pagesFound == 1)
+            {
+                rectSourceBookUI.left = 1143 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 1143;
+                    turningPageB = false;
+                    openPage--;
+                }
+            }
+            else if (openPage == 2)
+            {
+                rectSourceBookUI.left = 2286 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 2286;
+                    turningPageB = false;
+                    openPage--;
+                }
+            }
+            else if (openPage - 1 == pagesFound)
+            {
+                rectSourceBookUI.left = 3429 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 3429;
+                    turningPageB = false;
+                    openPage--;
+                }
+            }
+            else
+            {
+                rectSourceBookUI.left = 4572 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
+                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                {
+                    rectSourceBookUI.left = 4572;
                     turningPageB = false;
                     openPage--;
                 }
