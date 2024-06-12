@@ -31,8 +31,8 @@ int pagesFound = 3;
 int artUnderMap[12][18] = 
 {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1},
@@ -255,11 +255,8 @@ int main()
                 break;
             }
 
-            //mostly just animation
             if(playerTime.getElapsedTime().asSeconds() > 1.0f)
             {
-                rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
-
                 //moves the player
                 switch (playerDir)
                 {
@@ -282,42 +279,21 @@ int main()
                 playerY = oldPlayerY;
 
                 walking = false;
+                playerTime.restart();
             }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.75f && !playerAnimation)
-            {
-                rectSourcePlayer.left = 120 + playerDir * 160 + 640 * playerState;
 
-                playerAnimation = true;
-            }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && playerTime.getElapsedTime().asSeconds() < 0.75f && playerAnimation)
-            {
-                rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
-
-                playerAnimation = false;
-            }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.25f && playerTime.getElapsedTime().asSeconds() < 0.50f && !playerAnimation)
-            {
-                rectSourcePlayer.left = 80 + playerDir * 160 + 640 * playerState;
-                
-                playerAnimation = true;
-            }
+            //walking animation. function found at https://www.dcode.fr/function-equation-finder
+            int temp = static_cast<int>(playerTime.getElapsedTime().asSeconds() * 4);
+            rectSourcePlayer.left = playerDir * 160 + 640 * playerState - ((100 * (pow(temp, 4))) / 3) + (260 * static_cast<int>(pow(temp, 3))) - ((1880 * static_cast<int>(pow(temp, 2))) / 3) + 480 * temp;
         }
         else
         {
             //idle animation
             if (playerTime.getElapsedTime().asSeconds() > 1.0f)
             {
-                rectSourcePlayer.left = playerDir * 160 + 640 * playerState;
-
                 playerTime.restart();
-                playerAnimation = false;
             }
-            else if (playerTime.getElapsedTime().asSeconds() > 0.50f && !playerAnimation)
-            {
-                rectSourcePlayer.left = 40 + playerDir * 160 + 640 * playerState;
-
-                playerAnimation = true;
-            }
+            rectSourcePlayer.left = playerDir * 160 + 640 * playerState + 40 * (static_cast<int>(playerTime.getElapsedTime().asSeconds() * 2));
         }
         //sets player sprite
         playerSprite.setTextureRect(rectSourcePlayer);
