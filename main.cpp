@@ -19,6 +19,7 @@ bool walking = false;
 
 bool canWalk = true;
 
+
 bool bookOpening = false;
 bool bookClosing = false;
 bool bookOpen = false;
@@ -27,6 +28,13 @@ bool turningPageB = false;
 
 int openPage = 0;
 int pagesFound = 3;
+
+
+bool satchelOpen = false;
+bool satchelOpening = false;
+bool satchelClosing = false;
+
+
 
 int artUnderMap[12][18] = 
 {
@@ -74,12 +82,20 @@ int colisionMap[12][18] =
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
+Inventory inventory;
+
+Stack holding(-1,0);
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(240, 144), "New Witch");
     sf::View view = window.getView();
     view.setCenter(playerX*16,playerY*16);
     window.setView(view);
+
+    sf::Font font;
+    font.loadFromFile("Minecraftia-Regular.ttf");
+    sf::Text text("hi",font,5);
 
     sf::Texture playerTexture;
     playerTexture.loadFromFile("Witch.png");
@@ -88,6 +104,10 @@ int main()
     sf::IntRect rectSourcePlayer(0,0,40,40);
     sf::Sprite playerSprite(playerTexture, rectSourcePlayer);
     
+    //clock for players animation
+    sf::Clock playerTime;
+
+
 
     sf::Texture bookUITexture;
     bookUITexture.loadFromFile("ShadowBook.png");
@@ -97,12 +117,27 @@ int main()
 
     sf::Clock bookTime;
 
-    //clock for players animation
-    sf::Clock playerTime;
+
+
+    sf::Texture satchelTexture;
+    satchelTexture.loadFromFile("Satchel.png");
+
+    sf::IntRect rectSourceSatchel(525,0,105,105);
+    sf::Sprite satchelSprite(satchelTexture, rectSourceSatchel);
+
+    sf::Clock satchelTime;
+
+
+    sf::Texture itemTexture;
+    itemTexture.loadFromFile("ItemIcons.png");
+
+    sf::IntRect rectSourceItem(0,0,16,16);
+    sf::Sprite itemSprite(itemTexture, rectSourceItem);
 
     //clock to allow turning without walking
     sf::Clock walkDelay;
 
+    inventory.AddItem(1,120);
     while (window.isOpen())
     {
         sf::Event event;
@@ -134,6 +169,18 @@ int main()
             {
                 turningPageB = true;
                 bookTime.restart();
+            }
+
+            if(sf::FloatRect(37,128,35,10).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && !satchelOpen && !satchelOpening && !satchelClosing)
+            {
+                satchelOpening = true;
+                satchelTime.restart();
+            }
+            else if(sf::FloatRect(4,57,101,33).contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)) - view.getCenter() + sf::Vector2f(120,72)) && satchelOpen)
+            {
+                satchelClosing = true;
+                satchelOpen = false;
+                satchelTime.restart();
             }
         }
 
@@ -343,8 +390,8 @@ int main()
         {
             if(openPage == 0)
             {
-                rectSourceBookUI.left = 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 1016;
                     turningPageF = false;
@@ -353,8 +400,8 @@ int main()
             }
             else if (openPage == 1 && openPage == pagesFound)
             {
-                rectSourceBookUI.left = 1143 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 1143 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 2159;
                     turningPageF = false;
@@ -363,8 +410,8 @@ int main()
             }
             else if (openPage == 1)
             {
-                rectSourceBookUI.left = 2286 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 2286 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 3302;
                     turningPageF = false;
@@ -373,8 +420,8 @@ int main()
             }
             else if (openPage == pagesFound)
             {
-                rectSourceBookUI.left = 3429 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 3429 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 4445;
                     turningPageF = false;
@@ -383,8 +430,8 @@ int main()
             }
             else
             {
-                rectSourceBookUI.left = 4572 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 4572 + 127 * (static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 5588;
                     turningPageF = false;
@@ -396,8 +443,8 @@ int main()
         {
             if(openPage == 1)
             {
-                rectSourceBookUI.left = 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 0;
                     turningPageB = false;
@@ -406,8 +453,8 @@ int main()
             }
             else if (openPage == 2 && pagesFound == 1)
             {
-                rectSourceBookUI.left = 1143 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 1143 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 1143;
                     turningPageB = false;
@@ -416,8 +463,8 @@ int main()
             }
             else if (openPage == 2)
             {
-                rectSourceBookUI.left = 2286 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 2286 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 2286;
                     turningPageB = false;
@@ -426,8 +473,8 @@ int main()
             }
             else if (openPage - 1 == pagesFound)
             {
-                rectSourceBookUI.left = 3429 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 3429 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 3429;
                     turningPageB = false;
@@ -436,8 +483,8 @@ int main()
             }
             else
             {
-                rectSourceBookUI.left = 4572 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 8));
-                if (bookTime.getElapsedTime().asSeconds() > 1.0f)
+                rectSourceBookUI.left = 4572 + 127 * (8 - static_cast<int>(bookTime.getElapsedTime().asSeconds() * 16));
+                if (bookTime.getElapsedTime().asSeconds() > 0.5f)
                 {
                     rectSourceBookUI.left = 4572;
                     turningPageB = false;
@@ -445,11 +492,38 @@ int main()
                 }
             }
         }
-
         bookUISprite.setTextureRect(rectSourceBookUI);
 
-
-
+        if (satchelOpening)
+        {
+            satchelSprite.setPosition(sf::Vector2f(view.getCenter().x - 118,view.getCenter().y + 25 - satchelTime.getElapsedTime().asSeconds() * 58));
+            rectSourceSatchel.left = clamp(105 * (6 - static_cast<int>(satchelTime.getElapsedTime().asSeconds() * 24)),0,525);
+            if(satchelTime.getElapsedTime().asSeconds() > 1.0f)
+            {
+                satchelSprite.setPosition(sf::Vector2f(view.getCenter().x - 118,view.getCenter().y - 33));
+                satchelOpen = true;
+                satchelOpening = false;
+            }
+        }
+        else if (satchelClosing)
+        {
+            satchelSprite.setPosition(sf::Vector2f(view.getCenter().x - 118,view.getCenter().y - 33 + satchelTime.getElapsedTime().asSeconds() * 58));
+            rectSourceSatchel.left = clamp(105 * (static_cast<int>(clamp(satchelTime.getElapsedTime().asSeconds()- 0.6f, 0.f, 1.f) * 16)),0,525);
+            if(satchelTime.getElapsedTime().asSeconds() > 1.0f)
+            {
+                satchelSprite.setPosition(sf::Vector2f(view.getCenter().x - 118,view.getCenter().y + 25));
+                satchelClosing = false;
+            }
+        }
+        else if(!satchelOpen)
+        {
+            satchelSprite.setPosition(sf::Vector2f(view.getCenter().x - 118,view.getCenter().y + 25));
+        }        
+        else if(satchelOpen)
+        {
+            satchelSprite.setPosition(sf::Vector2f(view.getCenter().x - 118,view.getCenter().y - 33));
+        }
+        satchelSprite.setTextureRect(rectSourceSatchel);
 
 
 
@@ -496,6 +570,51 @@ int main()
 
 
         window.draw(bookUISprite);
+        window.draw(satchelSprite);
+
+        for(int i = 0; i < 6; i++)
+        {
+            if(inventory.stacks[i].type != -1)
+            {
+                rectSourceItem.left = itemDatabase[inventory.stacks[i].type].icon * 16;
+                itemSprite.setTextureRect(rectSourceItem);
+                itemSprite.setPosition(sf::Vector2f(satchelSprite.getPosition().x + 2 + i * 17,satchelSprite.getPosition().y + 53));
+                window.draw(itemSprite);
+                text.setPosition(sf::Vector2f(itemSprite.getPosition().x + 8, itemSprite.getPosition().y + 12));
+                text.setString("x" + to_string(inventory.stacks[i].amount));
+                window.draw(text);
+            }
+        }
+
+        for(int i = 6; i < 12; i++)
+        {
+            if(inventory.stacks[i].type != -1)
+            {
+                rectSourceItem.left = itemDatabase[inventory.stacks[i].type].icon * 16;
+                itemSprite.setTextureRect(rectSourceItem);
+                itemSprite.setPosition(sf::Vector2f(satchelSprite.getPosition().x + 2 + (i - 6) * 17,satchelSprite.getPosition().y + 70));
+                window.draw(itemSprite);
+                text.setPosition(sf::Vector2f(itemSprite.getPosition().x + 8, itemSprite.getPosition().y + 12));
+                text.setString("x" + to_string(inventory.stacks[i].amount));
+                window.draw(text);
+            }
+        }
+
+        for(int i = 12; i < 18; i++)
+        {
+            if(inventory.stacks[i].type != -1)
+            {
+                rectSourceItem.left = itemDatabase[inventory.stacks[i].type].icon * 16;
+                itemSprite.setTextureRect(rectSourceItem);
+                itemSprite.setPosition(sf::Vector2f(satchelSprite.getPosition().x + 2 + (i - 12) * 17,satchelSprite.getPosition().y + 87));
+                window.draw(itemSprite);
+                text.setPosition(sf::Vector2f(itemSprite.getPosition().x + 8, itemSprite.getPosition().y + 12));
+                text.setString("x" + to_string(inventory.stacks[i].amount));
+                window.draw(text);
+            }
+        }
+
+
 
         //shows the frame
         window.display();
